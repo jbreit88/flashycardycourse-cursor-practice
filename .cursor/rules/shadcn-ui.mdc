@@ -1,0 +1,32 @@
+---
+description: Use shadcn UI for all UI elements; init and add components when needed
+alwaysApply: true
+---
+
+# shadcn UI
+
+This project uses **shadcn UI** for all UI elements. Prefer shadcn components over custom implementations or other UI libraries.
+
+## Initialization
+
+If shadcn UI is not yet initialized in the project, run:
+
+```bash
+npx shadcn@latest init
+```
+
+## Adding Components
+
+If a particular component is not installed, add it with the CLI. **Use the `shadcn@latest` package (not `shadcnui`).** For example, to install the button component:
+
+```bash
+npx shadcn@latest add button
+```
+
+Replace `button` with the component name you need (e.g. `card`, `dialog`, `input`, `dropdown-menu`). Add components as needed before using them in the codebase.
+
+## Usage
+
+- Use shadcn UI components for buttons, forms, dialogs, navigation, and all other UI elements.
+- Do not introduce other UI libraries for elements that shadcn provides.
+- After adding a component, import and use it from the path configured by the project’s shadcn setup (typically under `src/components/ui/`).

@@ -1,8 +1,6 @@
 ---
-description: Use shadcn UI for all UI elements; init and add components when needed
 alwaysApply: true
 ---
-
 # shadcn UI
 
 This project uses **shadcn UI** for all UI elements. Prefer shadcn components over custom implementations or other UI libraries.

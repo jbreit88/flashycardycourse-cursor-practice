@@ -9,6 +9,7 @@ import {
 } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import { Poppins } from "next/font/google";
+import { Button } from "@/components/ui/button";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -35,8 +36,12 @@ export default function RootLayout({
         >
           <header className="flex justify-end items-center p-4 gap-4 h-16">
             <SignedOut>
-              <SignInButton mode="modal" fallbackRedirectUrl="/dashboard" />
-              <SignUpButton mode="modal" fallbackRedirectUrl="/dashboard" />
+              <SignInButton mode="modal" fallbackRedirectUrl="/dashboard">
+                <Button>Sign In</Button>
+              </SignInButton>
+              <SignUpButton mode="modal" fallbackRedirectUrl="/dashboard">
+                <Button variant="outline">Sign Up</Button>
+              </SignUpButton>
             </SignedOut>
             <SignedIn>
               <UserButton />

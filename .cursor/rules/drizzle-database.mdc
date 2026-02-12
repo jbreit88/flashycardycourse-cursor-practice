@@ -1,0 +1,41 @@
+---
+description: Database interactions must use Drizzle schema and queries
+alwaysApply: true
+---
+
+# Drizzle Database Rule
+
+All database interactions in this project **must** use the Drizzle ORM schema and query API. Do not use raw SQL strings, other ORMs, or direct client calls for data access.
+
+## Schema
+
+- Define and use tables from [src/db/schema.ts](mdc:src/db/schema.ts).
+- Import table references (e.g. `decksTable`, `cardsTable`) and use them in queries.
+- Do not duplicate table definitions or bypass the schema.
+
+## Queries
+
+- Use Drizzle query builders: `db.select()`, `db.insert()`, `db.update()`, `db.delete()`.
+- Use the schema columns and relations (e.g. `eq(cardsTable.deckId, id)`) for conditions.
+- Prefer Drizzle’s typed API over raw SQL; use `sql` template only when the query API cannot express the logic.
+
+## Examples
+
+```typescript
+// ✅ GOOD – Drizzle schema and query API
+import { db } from "@/db";
+import { decksTable } from "@/db/schema";
+import { eq } from "drizzle-orm";
+
+const deck = await db.select().from(decksTable).where(eq(decksTable.id, deckId));
+```
+
+```typescript
+// ❌ BAD – raw SQL
+await db.execute(sql`SELECT * FROM decks WHERE id = ${deckId}`);
+```
+
+```typescript
+// ❌ BAD – bypassing schema
+await db.execute("INSERT INTO decks (title) VALUES (?)", [title]);
+```

@@ -1,0 +1,54 @@
+---
+description: Clerk authentication and user data isolation—users may only access their own data
+alwaysApply: true
+---
+
+# Clerk Auth & Data Isolation
+
+All authentication in this project is handled by **Clerk**. Users must only be able to access their own data; never expose or allow access to data that does not belong to the current user.
+
+## Auth
+
+- Use Clerk for auth: `auth()` from `@clerk/nextjs/server` for server-side, `useAuth()` / `currentUser()` for client where appropriate.
+- Protect routes with Clerk middleware or explicit `auth()` checks; redirect or return 401 when unauthenticated.
+- Do not implement custom auth or bypass Clerk for identifying the current user.
+
+## Data ownership
+
+- User-owned data is keyed by Clerk user ID. In the schema, ownership is expressed via `ownerId` (e.g. [src/db/schema.ts](mdc:src/db/schema.ts) `decksTable.ownerId`). Related data (e.g. cards) is owned indirectly through owned entities (decks).
+- **Always** scope queries and mutations by the current user: e.g. when reading/updating/deleting a deck or any resource tied to it, ensure `ownerId` (or equivalent) matches the authenticated user’s ID from `auth()`.
+- Never return or mutate rows where `ownerId !== userId` (or the equivalent owner field). Validate ownership before updates/deletes; filter by `userId` on list/read operations.
+
+## Examples
+
+```typescript
+// ✅ GOOD – get current user and scope by ownerId
+import { auth } from "@clerk/nextjs/server";
+import { db } from "@/db";
+import { decksTable } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
+
+const { userId } = await auth();
+if (!userId) return null;
+
+const deck = await db
+  .select()
+  .from(decksTable)
+  .where(and(eq(decksTable.id, deckId), eq(decksTable.ownerId, userId)))
+  .limit(1);
+```
+
+```typescript
+// ❌ BAD – no ownership check; any user could access any deck
+const deck = await db.select().from(decksTable).where(eq(decksTable.id, deckId));
+```
+
+```typescript
+// ✅ GOOD – only list decks owned by the current user
+const decks = await db
+  .select()
+  .from(decksTable)
+  .where(eq(decksTable.ownerId, userId));
+```
+
+When adding new user-scoped tables, include an owner column (e.g. `ownerId`) and apply the same pattern: always filter or validate by the current Clerk user ID.

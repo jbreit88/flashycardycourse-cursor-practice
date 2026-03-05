@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
 import {
   ClerkProvider,
-  SignInButton,
-  SignUpButton,
   SignedIn,
   SignedOut,
   UserButton,
 } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import { Poppins } from "next/font/google";
-import { Button } from "@/components/ui/button";
+import { AuthDialog } from "@/components/auth-dialog";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -36,12 +34,7 @@ export default function RootLayout({
         >
           <header className="flex justify-end items-center p-4 gap-4 h-16">
             <SignedOut>
-              <SignInButton mode="modal" fallbackRedirectUrl="/dashboard">
-                <Button>Sign In</Button>
-              </SignInButton>
-              <SignUpButton mode="modal" fallbackRedirectUrl="/dashboard">
-                <Button variant="outline">Sign Up</Button>
-              </SignUpButton>
+              <AuthDialog />
             </SignedOut>
             <SignedIn>
               <UserButton />

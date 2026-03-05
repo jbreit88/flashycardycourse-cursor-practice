@@ -1,11 +1,7 @@
-import {
-  SignInButton,
-  SignUpButton,
-  SignedOut,
-} from "@clerk/nextjs";
+import { SignedOut } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { AuthDialog } from "@/components/auth-dialog";
 
 export default async function Home() {
   const { userId } = await auth();
@@ -23,16 +19,7 @@ export default async function Home() {
           You&apos;re personal flashcard platform
         </p>
         <SignedOut>
-          <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
-            <SignInButton mode="modal" fallbackRedirectUrl="/dashboard">
-              <Button size="lg">Sign In</Button>
-            </SignInButton>
-            <SignUpButton mode="modal" fallbackRedirectUrl="/dashboard">
-              <Button variant="outline" size="lg">
-                Sign Up
-              </Button>
-            </SignUpButton>
-          </div>
+          <AuthDialog />
         </SignedOut>
       </main>
     </div>

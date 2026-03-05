@@ -3,7 +3,19 @@ alwaysApply: true
 ---
 # shadcn UI
 
-This project uses **shadcn UI** for all UI elements. Prefer shadcn components over custom implementations or other UI libraries.
+This project uses **only** shadcn UI for all UI. No custom UI components or other UI libraries are allowed.
+
+## Mandatory Rules
+
+- **Only shadcn UI components** may be used for buttons, forms, dialogs, navigation, inputs, cards, and every other UI element.
+- **Do not create custom UI components.** If a pattern is needed, implement it by composing or configuring shadcn components from `src/components/ui/`.
+- **Do not introduce other UI libraries** (e.g. custom button/input/dialog components, MUI, Chakra, etc.) for elements that shadcn provides.
+- Import and use components from the project’s shadcn setup (typically `src/components/ui/`).
+
+## Clerk Authentication
+
+- **Sign in and sign up triggers:** All Clerk sign-in and sign-up entry points (e.g. “Sign in”, “Sign up”, “Get started”) must use the **shadcn Button** component (`src/components/ui/button`), not default Clerk components or custom buttons.
+- **Modal experience:** Sign in and sign up must be launched via a **modal** (use shadcn **Dialog** from `src/components/ui/dialog`). Do not use full-page redirects for the primary sign-in/sign-up flow when triggered from the app; open Clerk’s sign-in/sign-up UI inside the modal (e.g. by rendering Clerk’s components inside the Dialog content).
 
 ## Initialization
 
@@ -25,6 +37,6 @@ Replace `button` with the component name you need (e.g. `card`, `dialog`, `input
 
 ## Usage
 
-- Use shadcn UI components for buttons, forms, dialogs, navigation, and all other UI elements.
+- Use shadcn UI components for every UI element in the project.
 - Do not introduce other UI libraries for elements that shadcn provides.
 - After adding a component, import and use it from the path configured by the project’s shadcn setup (typically under `src/components/ui/`).

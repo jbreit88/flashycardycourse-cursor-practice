@@ -82,7 +82,7 @@ export default async function DashboardPage() {
             <ul className="space-y-2">
               {decks.map((deck) => (
                 <li key={deck.id}>
-                  <Link href={`/dashboard/decks/${deck.id}`} className="block">
+                  <Link href={`/decks/${deck.id}`} className="block">
                     <Card className="transition-colors hover:bg-accent/50">
                       <CardContent className="px-4 py-3">
                         <div className="flex items-center justify-between">

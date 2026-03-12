@@ -3,6 +3,25 @@ import { db } from "@/db";
 import { decksTable } from "@/db/schema";
 
 /**
+ * Create a new deck for the given owner. Call only with authenticated user's ID.
+ */
+export async function createDeckMutation(
+  ownerId: string,
+  title: string,
+  description?: string | null
+) {
+  const [row] = await db
+    .insert(decksTable)
+    .values({
+      ownerId,
+      title,
+      ...(description !== undefined && { description: description ?? null }),
+    })
+    .returning();
+  return row!;
+}
+
+/**
  * Get all decks owned by the given user, newest first.
  */
 export async function getDecksByOwnerId(ownerId: string) {

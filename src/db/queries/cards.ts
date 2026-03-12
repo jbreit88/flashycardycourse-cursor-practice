@@ -1,4 +1,4 @@
-import { asc, eq, inArray } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import { cardsTable } from "@/db/schema";
 
@@ -56,7 +56,7 @@ export async function getCardsByDeckId(deckId: number) {
     .select()
     .from(cardsTable)
     .where(eq(cardsTable.deckId, deckId))
-    .orderBy(asc(cardsTable.createdAt));
+    .orderBy(desc(cardsTable.createdAt), desc(cardsTable.id));
 }
 
 /**

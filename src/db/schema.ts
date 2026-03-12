@@ -11,6 +11,7 @@ export const decksTable = pgTable("decks", {
   ownerId: varchar({ length: 255 }).notNull(), // Clerk user ID
   title: varchar({ length: 255 }).notNull(),
   createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
 });
 
 export const cardsTable = pgTable("cards", {
@@ -21,4 +22,5 @@ export const cardsTable = pgTable("cards", {
   front: text().notNull(),
   back: text().notNull(),
   createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
 });

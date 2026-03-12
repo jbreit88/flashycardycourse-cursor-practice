@@ -10,6 +10,7 @@ export const decksTable = pgTable("decks", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   ownerId: varchar({ length: 255 }).notNull(), // Clerk user ID
   title: varchar({ length: 255 }).notNull(),
+  description: text(),
   createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
 });

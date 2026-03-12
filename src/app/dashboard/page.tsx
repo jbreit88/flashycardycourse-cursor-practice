@@ -93,8 +93,8 @@ export default async function DashboardPage() {
                           </span>
                         </div>
                         <CardDescription className="mt-0.5 text-xs">
-                          Created{" "}
-                          {new Date(deck.createdAt).toLocaleDateString(
+                          Updated{" "}
+                          {new Date(deck.updatedAt).toLocaleDateString(
                             undefined,
                             { dateStyle: "medium" }
                           )}

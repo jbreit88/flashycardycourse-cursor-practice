@@ -1,19 +1,24 @@
 ---
 alwaysApply: true
-description: Server components for data retrieval, server actions for mutations, and Zod validation for all server action inputs
 ---
 # Server Data & Validation
 
 Data flow and validation in this project follow these rules.
 
+## Data access via db/queries
+
+- **All** data fetching and mutations must go through **helper functions** (queries and mutations) defined in the **`src/db/queries`** directory.
+- Do **not** call `db.select()`, `db.insert()`, `db.update()`, or `db.delete()` directly from server components, server actions, or API routes. Instead, import and call the appropriate helper from `@/db/queries/...`.
+- Define one or more modules under `src/db/queries` (e.g. `decks.ts`, `cards.ts`) that export functions for reading and writing; keep Drizzle usage and ownership checks inside those helpers.
+
 ## Data retrieval
 
-- **Always** perform data retrieval in **server components** (e.g. async React Server Components that call the DB).
+- **Always** perform data retrieval in **server components** (e.g. async React Server Components that call query helpers from `db/queries`).
 - Do not fetch or read from the database in client components; pass data as props from server components or load it in server components and pass it down.
 
 ## Mutations (insert / update / delete)
 
-- **Always** perform inserts, updates, and deletes via **server actions** (functions marked with `"use server"`).
+- **Always** perform inserts, updates, and deletes via **server actions** (functions marked with `"use server"`). Server actions must call mutation helpers from `db/queries`; they must not use `db` directly.
 - Do not mutate the database from client components, API routes (unless they delegate to a server action), or client-side code.
 
 ## Validation with Zod
@@ -30,26 +35,36 @@ Data flow and validation in this project follow these rules.
 ## Examples
 
 ```typescript
-// ✅ GOOD – server component fetches data
+// ✅ GOOD – server component uses query helper from db/queries
 // app/decks/page.tsx
 import { auth } from "@clerk/nextjs/server";
-import { db } from "@/db";
-import { decksTable } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { getDecksByOwnerId } from "@/db/queries/decks";
 
 export default async function DecksPage() {
   const { userId } = await auth();
   if (!userId) return null;
-  const decks = await db.select().from(decksTable).where(eq(decksTable.ownerId, userId));
+  const decks = await getDecksByOwnerId(userId);
   return <DecksList decks={decks} />;
 }
 ```
 
 ```typescript
-// ✅ GOOD – server action with typed input and Zod validation
+// ✅ GOOD – query helper in src/db/queries/decks.ts (Drizzle + ownership here)
+import { db } from "@/db";
+import { decksTable } from "@/db/schema";
+import { eq } from "drizzle-orm";
+
+export async function getDecksByOwnerId(ownerId: string) {
+  return db.select().from(decksTable).where(eq(decksTable.ownerId, ownerId));
+}
+```
+
+```typescript
+// ✅ GOOD – server action calls mutation helper from db/queries
 "use server";
 
 import { z } from "zod";
+import { createDeckMutation } from "@/db/queries/decks";
 
 const createDeckSchema = z.object({
   title: z.string().min(1).max(200),
@@ -58,8 +73,14 @@ const createDeckSchema = z.object({
 export async function createDeck(input: z.infer<typeof createDeckSchema>) {
   const parsed = createDeckSchema.safeParse(input);
   if (!parsed.success) throw new Error("Invalid input");
-  // ... insert using parsed.data
+  return createDeckMutation(parsed.data); // ownership handled inside helper
 }
+```
+
+```typescript
+// ❌ BAD – direct db usage in server component
+import { db } from "@/db";
+const decks = await db.select().from(decksTable).where(...); // use db/queries helper
 ```
 
 ```typescript

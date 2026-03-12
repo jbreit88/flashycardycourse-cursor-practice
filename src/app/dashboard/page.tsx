@@ -1,9 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { eq, inArray, desc } from "drizzle-orm";
-import { db } from "@/db";
-import { decksTable, cardsTable } from "@/db/schema";
+import { getDecksByOwnerId } from "@/db/queries/decks";
+import { getCardCountsByDeckIds } from "@/db/queries/cards";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,24 +18,9 @@ export default async function DashboardPage() {
     redirect("/");
   }
 
-  const decks = await db
-    .select()
-    .from(decksTable)
-    .where(eq(decksTable.ownerId, userId))
-    .orderBy(desc(decksTable.createdAt));
-
+  const decks = await getDecksByOwnerId(userId);
   const deckIds = decks.map((d) => d.id);
-  const cardCountByDeck: Record<number, number> = {};
-
-  if (deckIds.length > 0) {
-    const cards = await db
-      .select({ deckId: cardsTable.deckId })
-      .from(cardsTable)
-      .where(inArray(cardsTable.deckId, deckIds));
-    for (const c of cards) {
-      cardCountByDeck[c.deckId] = (cardCountByDeck[c.deckId] ?? 0) + 1;
-    }
-  }
+  const cardCountByDeck = await getCardCountsByDeckIds(deckIds);
 
   const totalCards = Object.values(cardCountByDeck).reduce((a, b) => a + b, 0);
 

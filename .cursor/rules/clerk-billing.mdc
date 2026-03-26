@@ -1,0 +1,73 @@
+---
+description: Clerk Billing (B2C)—plans, features, pricing UI, and access control with has() and Show
+alwaysApply: true
+---
+
+# Clerk Billing (B2C SaaS)
+
+Subscriptions and payments use **Clerk Billing** (B2C). Plans and features are configured in the [Clerk Dashboard](https://dashboard.clerk.com); do not duplicate billing state in app code except for UX gating aligned with Clerk.
+
+Billing is **beta**—pin `@clerk/nextjs` and `clerk-js` versions per [Clerk pinning docs](https://clerk.com/docs/pinning.md) to reduce breaking changes.
+
+## Canonical identifiers
+
+Use **only** these slugs when checking plans or features (match Dashboard exactly):
+
+**Plans**
+
+- `free_user`
+- `pro`
+
+**Features**
+
+- `ai_flashcard_generation`
+- `unlimited_decks`
+- `three_deck_limit`
+
+Do not invent alternate plan or feature names in code.
+
+## Pricing UI
+
+- Use Clerk’s `<PricingTable />` from `@clerk/nextjs` on a **dedicated pricing page** (recommended pattern).
+- Compose surrounding layout with **shadcn** components from `src/components/ui/` (e.g. layout wrappers, buttons for nav)—do not add non-shadcn UI libraries for elements shadcn provides.
+
+## Server-side access checks
+
+Use `has()` from `auth()` for routes, server components, and server actions that must enforce entitlements (especially mutations and anything that could be abused if only hidden in the UI).
+
+```typescript
+import { auth } from "@clerk/nextjs/server";
+
+const { has } = await auth();
+
+const isPro = has({ plan: "pro" });
+const canUseAi = has({ feature: "ai_flashcard_generation" });
+```
+
+Enforce limits that map to features (e.g. deck counts, AI generation) in **server actions** via `has()` plus existing `db/queries` helpers—never rely on client-only checks for authorization.
+
+## Client-side conditional UI
+
+Use `<Show>` from `@clerk/nextjs` when conditionally rendering UI by plan or feature, with a `fallback` when the user lacks access.
+
+```tsx
+import { Show } from "@clerk/nextjs";
+
+<Show
+  when={{ plan: "pro" }}
+  fallback={<p>Pro plan required.</p>}
+>
+  {/* Pro-only UI */}
+</Show>
+
+<Show
+  when={{ feature: "ai_flashcard_generation" }}
+  fallback={/* upgrade CTA using shadcn Button */}
+>
+  {/* AI generation UI */}
+</Show>
+```
+
+## Relationship to auth and data rules
+
+- **Clerk auth** still identifies the user; **billing** gates product capabilities. Combine `userId` / `ownerId` checks with `has()` where both apply (e.g. user must own the deck *and* have the feature to run AI on it).

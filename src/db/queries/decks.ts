@@ -78,3 +78,17 @@ export async function updateDeckMutation(
     .returning();
   return row;
 }
+
+/**
+ * Delete a deck owned by the given user. Cards are removed by DB cascade (see schema).
+ * Returns the deleted row, or null if no matching owned deck.
+ */
+export async function deleteDeckMutation(deckId: number, ownerId: string) {
+  const [row] = await db
+    .delete(decksTable)
+    .where(
+      and(eq(decksTable.id, deckId), eq(decksTable.ownerId, ownerId))
+    )
+    .returning();
+  return row ?? null;
+}

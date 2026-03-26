@@ -28,9 +28,10 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider appearance={{ baseTheme: dark }}>
-      <html lang="en" className="dark">
+      <html lang="en" className="dark" suppressHydrationWarning>
         <body
           className={`${poppins.variable} font-sans antialiased`}
+          suppressHydrationWarning
         >
           <header className="flex justify-end items-center p-4 gap-4 h-16">
             <SignedOut>

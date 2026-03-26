@@ -10,6 +10,9 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+import { EditDeckTrigger } from "@/app/decks/[deckId]/edit-deck-trigger";
+import { formatDateMedium } from "@/lib/format-date";
+import { DeleteDeckButton } from "./delete-deck-button";
 import { NewDeckButton } from "./new-deck-button";
 
 export default async function DashboardPage() {
@@ -80,30 +83,39 @@ export default async function DashboardPage() {
             </Card>
           ) : (
             <ul className="space-y-2">
-              {decks.map((deck) => (
-                <li key={deck.id}>
-                  <Link href={`/decks/${deck.id}`} className="block">
-                    <Card className="transition-colors hover:bg-accent/50">
-                      <CardContent className="px-4 py-3">
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium">{deck.title}</span>
-                          <span className="text-muted-foreground text-sm">
-                            {cardCountByDeck[deck.id] ?? 0} card
-                            {(cardCountByDeck[deck.id] ?? 0) !== 1 ? "s" : ""}
+              {decks.map((deck) => {
+                const count = cardCountByDeck[deck.id] ?? 0;
+                return (
+                  <li key={deck.id}>
+                    <Card className="flex flex-row items-stretch gap-1 transition-colors hover:bg-accent/50">
+                      <Link
+                        href={`/decks/${deck.id}`}
+                        className="flex min-w-0 flex-1 flex-col justify-center px-4 py-3"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="truncate font-medium">
+                            {deck.title}
+                          </span>
+                          <span className="text-muted-foreground shrink-0 text-sm">
+                            {count} card{count !== 1 ? "s" : ""}
                           </span>
                         </div>
                         <CardDescription className="mt-0.5 text-xs">
-                          Updated{" "}
-                          {new Date(deck.updatedAt).toLocaleDateString(
-                            undefined,
-                            { dateStyle: "medium" }
-                          )}
+                          Updated {formatDateMedium(deck.updatedAt)}
                         </CardDescription>
-                      </CardContent>
+                      </Link>
+                      <div className="flex shrink-0 items-center gap-0.5 pr-2">
+                        <EditDeckTrigger deck={deck} />
+                        <DeleteDeckButton
+                          deckId={deck.id}
+                          deckTitle={deck.title}
+                          cardCount={count}
+                        />
+                      </div>
                     </Card>
-                  </Link>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </section>

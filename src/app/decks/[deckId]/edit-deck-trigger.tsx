@@ -22,10 +22,10 @@ export function EditDeckTrigger({ deck }: Props) {
     <>
       <Button
         variant="ghost"
-        size="icon"
+        size="icon-sm"
         onClick={() => setOpen(true)}
         aria-label="Edit deck"
-        className="size-8 shrink-0"
+        className="text-muted-foreground hover:text-foreground shrink-0"
       >
         <Pencil className="size-4" />
       </Button>

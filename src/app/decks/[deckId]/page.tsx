@@ -5,6 +5,7 @@ import { getDeckByIdAndOwnerId } from "@/db/queries/decks";
 import { getCardsByDeckId } from "@/db/queries/cards";
 import { AddCardDialog } from "./add-card-dialog";
 import { DeckCardItem } from "./deck-card-item";
+import { DeleteDeckButton } from "@/app/dashboard/delete-deck-button";
 import { EditDeckTrigger } from "./edit-deck-trigger";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +13,7 @@ import {
   CardContent,
   CardDescription,
 } from "@/components/ui/card";
+import { formatDateMedium } from "@/lib/format-date";
 
 type Props = {
   params: Promise<{ deckId: string }>;
@@ -56,17 +58,23 @@ export default async function DeckPage({ params }: Props) {
                     </p>
                   ) : null}
                 </div>
-                <EditDeckTrigger
-                  deck={{ id: deck.id, title: deck.title, description: deck.description ?? undefined }}
-                />
+                <div className="flex shrink-0 items-center gap-0.5">
+                  <EditDeckTrigger
+                    deck={{ id: deck.id, title: deck.title, description: deck.description ?? undefined }}
+                  />
+                  <DeleteDeckButton
+                    deckId={deck.id}
+                    deckTitle={deck.title}
+                    cardCount={cards.length}
+                    redirectTo="/dashboard"
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
           <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
             {cards.length} card{cards.length !== 1 ? "s" : ""} · Updated{" "}
-            {new Date(deck.updatedAt).toLocaleDateString(undefined, {
-              dateStyle: "medium",
-            })}
+            {formatDateMedium(deck.updatedAt)}
           </p>
           {cards.length > 0 ? (
             <Button asChild className="mt-3">

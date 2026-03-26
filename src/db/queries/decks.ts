@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { decksTable } from "@/db/schema";
 
@@ -30,6 +30,17 @@ export async function getDecksByOwnerId(ownerId: string) {
     .from(decksTable)
     .where(eq(decksTable.ownerId, ownerId))
     .orderBy(desc(decksTable.createdAt));
+}
+
+/**
+ * Count decks owned by the given user (for plan limits).
+ */
+export async function countDecksByOwnerId(ownerId: string) {
+  const [row] = await db
+    .select({ count: count() })
+    .from(decksTable)
+    .where(eq(decksTable.ownerId, ownerId));
+  return Number(row?.count ?? 0);
 }
 
 /**

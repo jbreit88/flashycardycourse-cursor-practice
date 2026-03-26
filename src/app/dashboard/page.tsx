@@ -1,8 +1,10 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { FREE_PLAN_DECK_LIMIT } from "@/lib/deck-limits";
 import { getDecksByOwnerId } from "@/db/queries/decks";
 import { getCardCountsByDeckIds } from "@/db/queries/cards";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -16,12 +18,17 @@ import { DeleteDeckButton } from "./delete-deck-button";
 import { NewDeckButton } from "./new-deck-button";
 
 export default async function DashboardPage() {
-  const { userId } = await auth();
+  const { userId, has } = await auth();
   if (!userId) {
     redirect("/");
   }
 
   const decks = await getDecksByOwnerId(userId);
+  const isPro = has({ plan: "pro" });
+  const canCreateMoreDecks =
+    has({ feature: "unlimited_decks" }) ||
+    isPro ||
+    decks.length < FREE_PLAN_DECK_LIMIT;
   const deckIds = decks.map((d) => d.id);
   const cardCountByDeck = await getCardCountsByDeckIds(deckIds);
 
@@ -31,9 +38,16 @@ export default async function DashboardPage() {
     <div className="min-h-[calc(100vh-4rem)] px-4 py-8">
       <div className="mx-auto max-w-3xl">
         <header className="mb-8">
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Dashboard
-          </h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+              Dashboard
+            </h1>
+            {isPro && (
+              <Badge variant="secondary" className="font-medium">
+                Pro
+              </Badge>
+            )}
+          </div>
           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
             Your flashcard overview
           </p>
@@ -59,11 +73,25 @@ export default async function DashboardPage() {
         </section>
 
         <section>
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-50">
               Your decks
             </h2>
-            <NewDeckButton />
+            <div className="flex flex-col items-stretch gap-1 sm:items-end">
+              <NewDeckButton canCreateDeck={canCreateMoreDecks} />
+              {!canCreateMoreDecks && (
+                <p className="text-muted-foreground text-xs">
+                  Free plan: {FREE_PLAN_DECK_LIMIT} deck limit.{" "}
+                  <Link
+                    href="/pricing"
+                    className="text-primary font-medium underline underline-offset-2"
+                  >
+                    Upgrade to Pro
+                  </Link>{" "}
+                  for unlimited decks.
+                </p>
+              )}
+            </div>
           </div>
 
           {decks.length === 0 ? (
@@ -78,6 +106,7 @@ export default async function DashboardPage() {
                   label="Create your first deck"
                   variant="default"
                   size="default"
+                  canCreateDeck={canCreateMoreDecks}
                 />
               </CardFooter>
             </Card>

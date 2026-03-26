@@ -68,6 +68,11 @@ export default async function DeckPage({ params }: Props) {
               dateStyle: "medium",
             })}
           </p>
+          {cards.length > 0 ? (
+            <Button asChild className="mt-3">
+              <Link href={`/decks/${deckId}/study`}>Study deck</Link>
+            </Button>
+          ) : null}
         </header>
 
         <section>
